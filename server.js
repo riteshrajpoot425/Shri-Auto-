@@ -12,13 +12,16 @@ const contactRoutes = require("./routes/contactRoutes");
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Middleware
 app.use(express.json({ limit: "1mb" }));
 app.use(express.urlencoded({ extended: true }));
 
+// API routes
 app.use("/api/auth", authRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/contact", contactRoutes);
 
+// Serve frontend files
 app.use(express.static(path.join(__dirname, "public")));
 
 app.get("/", (req, res) => {
@@ -29,6 +32,7 @@ app.get("/admin", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "admin.html"));
 });
 
+// Handle unknown API routes
 app.use("/api", (req, res) => {
   res.status(404).json({
     success: false,
@@ -36,21 +40,22 @@ app.use("/api", (req, res) => {
   });
 });
 
+// Connect database and start server
 async function startServer() {
   try {
     if (!process.env.MONGO_URI) {
-      throw new Error("MONGO_URI is missing");
+      throw new Error("MONGO_URI is missing from .env");
     }
 
     if (!process.env.JWT_SECRET) {
-      throw new Error("JWT_SECRET is missing");
+      throw new Error("JWT_SECRET is missing from .env");
     }
 
     await mongoose.connect(process.env.MONGO_URI);
     console.log("MongoDB connected successfully");
 
     app.listen(PORT, "0.0.0.0", () => {
-      console.log(`Shri Automobile listening on port ${PORT}`);
+      console.log(`Shri Automobile running on port ${PORT}`);
     });
   } catch (error) {
     console.error("Server startup failed:", error.message);
